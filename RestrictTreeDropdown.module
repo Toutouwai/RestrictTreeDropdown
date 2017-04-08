@@ -1,0 +1,86 @@
+<?php
+
+/**
+ *
+ * Restrict Tree Dropdown
+ *
+ * @author Robin Sallis
+ *
+ * ProcessWire 3.x
+ * Copyright (C) 2011 by Ryan Cramer
+ * Licensed under GNU/GPL v2, see LICENSE.TXT
+ *
+ * http://www.processwire.com
+ * http://www.ryancramer.com
+ *
+ */
+
+class RestrictTreeDropdown extends WireData implements Module, ConfigurableModule {
+
+	/**
+	 * Module information
+	 */
+	public static function getModuleInfo() {
+		return array(
+			'title' => 'Restrict Tree Dropdown',
+			'version' => 1,
+			'summary' => 'Allows the Tree dropdown menu to be hidden for selected roles.',
+			'autoload' => "template=admin",
+			'icon' => 'bars',
+		);
+	}
+
+	/**
+	 * Ready
+	 */
+	public function ready() {
+		$user = $this->user;
+		$selected_roles = $this->selected_roles;
+		$prevent_dropdown = false;
+		if(in_array('all-roles', $selected_roles)) {
+			$prevent_dropdown = true;
+		} elseif(!$user->isSuperuser() && in_array('nonsuperuser', $selected_roles)) {
+			$prevent_dropdown = true;
+		} elseif(count(array_intersect($selected_roles, $user->roles->explode('name')))) {
+			$prevent_dropdown = true;
+		}
+
+		if($prevent_dropdown) {
+			// add Javascript
+			$this->addHookAfter('ProcessController::execute', $this, 'addScript');
+		}
+	}
+
+	/**
+	 * Add Javascript
+	 */
+	public function addScript($event) {
+		$info = $this->getModuleInfo();
+		$version = (int) $info['version'];
+		$config = $this->config;
+		$config->scripts->add($config->urls->{$this->className} . "{$this->className}.js?v=$version");
+	}
+
+	/**
+	 * Config inputfields
+	 */
+	public function getModuleConfigInputfields() {
+		$inputfields = new InputfieldWrapper();
+
+		$f_name = 'selected_roles';
+		$f = $this->modules->get('InputfieldAsmSelect');
+		$f->name = $f_name;
+		$f->label = $this->_('Hide dropdown for these roles');
+		$roles = $this->roles->find("name!=guest");
+		foreach($roles as $select_option) {
+			$f->addOption($select_option->name);
+		}
+		$f->addOption('nonsuperuser', $this->_('All non-superuser roles'));
+		$f->addOption('all-roles', $this->_('All roles'));
+		$f->value = $this->$f_name;
+		$inputfields->add($f);
+
+		return $inputfields;
+	}
+
+}
