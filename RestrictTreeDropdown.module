@@ -34,6 +34,7 @@ class RestrictTreeDropdown extends WireData implements Module, ConfigurableModul
 	 * Construct
 	 */
 	public function __construct() {
+		// Set default config values
 		$this->set('selected_roles', array());
 	}
 
