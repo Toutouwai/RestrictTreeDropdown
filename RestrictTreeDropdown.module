@@ -25,6 +25,7 @@ class RestrictTreeDropdown extends WireData implements Module, ConfigurableModul
 			'title' => 'Restrict Tree Dropdown',
 			'version' => 2,
 			'summary' => 'Allows the Tree dropdown menu to be hidden for selected roles.',
+			'author' => 'Robin Sallis',
 			'autoload' => "template=admin",
 			'icon' => 'bars',
 		);
