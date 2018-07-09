@@ -65,7 +65,7 @@ class RestrictTreeDropdown extends WireData implements Module, ConfigurableModul
 	 */
 	public function addScript($event) {
 		$info = $this->getModuleInfo();
-		$version = (int) $info['version'];
+		$version = $info['version'];
 		$config = $this->config;
 		$config->scripts->add($config->urls->{$this->className} . "{$this->className}.js?v=$version");
 	}
